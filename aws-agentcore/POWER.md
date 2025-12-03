@@ -1,5 +1,5 @@
 ---
-name: "agentcore"
+name: "aws-agentcore"
 displayName: "AWS Bedrock AgentCore"
 description: "Build, test, and deploy AI agents using AWS Bedrock AgentCore with local development workflow"
 keywords: ["agentcore", "bedrock", "aws", "agents", "ai", "strands", "development", "agent"]

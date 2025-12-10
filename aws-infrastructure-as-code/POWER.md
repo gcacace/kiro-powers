@@ -1,7 +1,7 @@
 ---
 name: "aws-infrastructure-as-code"
 displayName: "Build AWS infrastructure with CDK and CloudFormation"
-description: "Build well-architected AWS infrastructure with CDK using latest documentation, best practices, and code samples. Validate CloudFormation templates, check compliance, and troubleshoot deployments."
+description: "Build well-architected AWS infrastructure with CDK using latest documentation, best practices, and code samples. Validate CloudFormation templates, check resource configuration security compliance, and troubleshoot deployments."
 keywords: ["aws", "cdk", "cloudformation", "troubleshoot", "validate", "compliance", "cfn-lint", "cfn-guard", "infrastructure", "iac", "template", "stack", "construct", "resource", "deployment"]
 author: "AWS"
 ---
@@ -10,7 +10,7 @@ author: "AWS"
 
 ## Overview
 
-Build well-architected CDK applications using the latest documentation on constructs and best practices, and improved correctness with CloudFormation syntax validation, compliance and troubleshooting tools.
+Build well-architected CDK applications using the latest documentation on constructs and best practices, and improved correctness with CloudFormation resource configuration syntax validation, compliance and troubleshooting tools.
 
 ## When to Use This Power
 
@@ -130,7 +130,7 @@ usePower("aws-infrastructure-as-code", "awslabs.aws-iac-mcp-server", "search_clo
 - **Always synthesize to validate** - Run `cdk synth` after writing CDK code to validate it compiles and generates valid CloudFormation
 - **Read complete documentation** - Use `read_iac_documentation_page` when you need full details on construct properties and methods
 
-### For CloudFormation Validation
+### For CloudFormation Resource Configuration Validation
 
 - **Validate early and often** - Run `validate_cloudformation_template` on synthesized templates before deployment to catch syntax errors
 - **Check compliance before production** - Use `check_cloudformation_template_compliance` to catch security issues before they reach production

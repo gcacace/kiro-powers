@@ -3,6 +3,14 @@
 ## Purpose
 This steering file provides guidance for setting up effective CloudWatch alarms using recommended configurations and best practices.
 
+## When to Load This Steering
+Load this when the user needs to:
+- Set up new CloudWatch alarms
+- Improve existing alarm configurations
+- Reduce alarm fatigue and false positives
+- Create intelligent alerting strategies
+- Implement SLO-based alerting
+
 ## Core Concepts
 
 ### Alarm States
@@ -205,6 +213,21 @@ Component Alarms:
   - cache-errors: ElastiCache Evictions > 1000
 
 Rationale: Service errors combined with dependency issues indicate cascading failure
+```
+
+**Scenario 3: Cost Anomaly**
+Alert when costs spike unexpectedly:
+
+```
+Composite Alarm: "cost-spike"
+
+Logic: high-lambda-invocations AND high-data-transfer
+
+Component Alarms:
+  - high-lambda-invocations: Invocations > baseline * 2
+  - high-data-transfer: NetworkOut > baseline * 2
+
+Rationale: Unusual cost drivers indicate potential issue or attack
 ```
 
 ## Anomaly Detection Alarms

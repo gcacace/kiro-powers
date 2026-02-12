@@ -3,6 +3,14 @@
 ## Purpose
 This steering file provides comprehensive guidance for responding to incidents and troubleshooting issues using the full AWS observability stack.
 
+## When to Load This Steering
+Load this when the user needs to:
+- Respond to production incidents
+- Troubleshoot application errors or performance issues
+- Investigate service outages
+- Perform root cause analysis
+- Create incident reports and postmortems
+
 ## Incident Response Framework
 
 ### Phase 1: Detection and Triage
@@ -192,6 +200,7 @@ This steering file provides comprehensive guidance for responding to incidents a
    - Metric graphs showing anomalies
    - Trace examples demonstrating failures
    - CloudTrail events showing changes
+   - Cost data showing resource usage
 
 ### Phase 6: Postmortem and Prevention
 
@@ -310,6 +319,7 @@ fields @timestamp, @message, errorType
 - Check CloudWatch Metrics for resource utilization
 - Query logs for timeout errors
 - Review Application Signals for latency increases
+- Check Cost Explorer for usage spikes
 
 **Mitigation**: Scale resources, optimize code
 
@@ -388,6 +398,7 @@ fields @timestamp, @message
 - Check CloudWatch Metrics for request rates
 - Query logs for request patterns
 - Review Application Signals for traffic sources
+- Check Cost Explorer for usage spikes
 
 **Mitigation**:
 - Enable auto-scaling
@@ -418,7 +429,9 @@ fields @timestamp, @message
    ↓
 6. Change Detection (CloudTrail)
    ↓
-7. Documentation (AWS Documentation)
+7. Cost Impact (Cost Explorer)
+   ↓
+8. Documentation (AWS Documentation)
 ```
 
 ### Example: Complete Incident Investigation
@@ -461,12 +474,14 @@ Query: get_metric_data(
 Result: Database CPU at 95%
 ```
 
-**Step 6: Check CloudTrail**
+**Step 6: Check CloudTrail (via CloudWatch Logs)**
 ```
-Query: lookup_events(
-  event_source="rds.amazonaws.com",
-  start_time="1 hour ago"
-)
+# Query CloudTrail logs for RDS changes
+fields eventTime, eventName, userIdentity.userName, requestParameters
+| filter eventSource = "rds.amazonaws.com"
+| sort eventTime desc
+| limit 50
+
 Result: No recent database changes
 ```
 
@@ -506,6 +521,7 @@ Follow-up: Fix N+1 query, add database query monitoring
 - [ ] Analyze traces for failures
 - [ ] Check metrics for anomalies
 - [ ] Review CloudTrail for changes
+- [ ] Assess cost impact
 - [ ] Document timeline
 - [ ] Implement mitigation
 - [ ] Verify recovery

@@ -1,8 +1,8 @@
 ---
 name: "aws-observability"
 displayName: "AWS Observability"
-description: "Comprehensive AWS observability platform combining CloudWatch Logs, Metrics, Alarms, Application Signals (APM), CloudTrail security auditing, and automated codebase observability gap analysis, for complete monitoring, troubleshooting, and optimization."
-keywords: ["cloudwatch", "observability", "monitoring", "logs", "metrics", "traces", "alarms", "cloudtrail", "application-signals", "log-insights", "security", "audit", "performance", "apm", "distributed-tracing", "codebase-analysis", "instrumentation", "code-quality"]
+description: "Comprehensive AWS observability platform combining CloudWatch Logs, Metrics, Alarms, Application Signals (APM), CloudTrail security auditing (via CloudWatch Logs), Cost Explorer, AWS Documentation, and automated codebase observability analysis for complete monitoring, troubleshooting, and optimization."
+keywords: ["cloudwatch", "observability", "monitoring", "logs", "metrics", "traces", "alarms", "cloudtrail", "application-signals", "log-insights", "security", "audit", "performance", "apm", "distributed-tracing", "cost-optimization", "codebase-analysis", "instrumentation", "code-quality"]
 author: "AWS"
 ---
 
@@ -13,10 +13,10 @@ author: "AWS"
 1. **AWS CLI configured** with credentials (`aws configure` or `~/.aws/credentials`)
 2. **Python 3.10+** and `uv` installed ([Install uv](https://docs.astral.sh/uv/getting-started/installation/))
 3. **Required AWS Permissions**: Your IAM user/role needs:
-   - `logs:*` for CloudWatch Logs operations
+   - `logs:*` for CloudWatch Logs operations (includes CloudTrail log querying)
    - `cloudwatch:*` for CloudWatch Metrics, Alarms, and Application Signals
    - `xray:*` for distributed tracing
-   - `cloudtrail:LookupEvents` for CloudTrail queries
+   - `ce:*` for Cost Explorer access
 
 ## Configuration
 
@@ -50,9 +50,10 @@ The comprehensive AWS observability platform combining monitoring, troubleshooti
 - **CloudWatch Logs** - Query and analyze logs using CloudWatch Logs Insights
 - **Metrics & Alarms** - Metric querying with Metrics Insights and intelligent alarm recommendations
 - **Application Signals** - APM with distributed tracing, service maps, SLOs, and enablement guides
-- **Codebase Observability Analysis** - Automated analysis of codebases to identify observability gaps and provide actionable recommendations
-- **CloudTrail Integration** - Security auditing and compliance tracking
+- **CloudTrail Integration** - Security auditing and compliance tracking (via CloudWatch Logs)
+- **Cost Explorer** - AWS cost analysis, forecasting, and optimization
 - **AWS Documentation** - Direct access to official AWS docs for troubleshooting
+- **Codebase Observability Analysis** - Automated analysis of codebases to identify observability gaps and provide actionable recommendations
 
 **Authentication**: Requires AWS credentials (AWS CLI profile or IAM role).
 
@@ -119,16 +120,19 @@ The comprehensive AWS observability platform combining monitoring, troubleshooti
 - Root cause analysis for distributed systems
 - Getting started with Application Signals setup
 
-### 4. CloudTrail Security Auditing
+### 4. CloudTrail Security Auditing (via CloudWatch Logs)
 
 **Primary Use Case**: Security auditing, compliance, and governance
 
+**Prerequisites**: CloudTrail must be configured to send logs to CloudWatch Logs
+
 **Key Features**:
-- API call history and analysis
+- API call history and analysis using CloudWatch Logs Insights queries
 - User activity tracking across AWS accounts
 - Resource change tracking and audit trails
 - IAM permission change monitoring
 - Compliance reporting and security investigations
+- Real-time correlation with application logs
 
 **When to Use**:
 - Investigating security incidents
@@ -136,9 +140,48 @@ The comprehensive AWS observability platform combining monitoring, troubleshooti
 - Compliance auditing and reporting
 - Understanding who did what and when
 - Detecting unauthorized access attempts
+- Correlating security events with application behavior
 
-### 5. Codebase Observability Gap Analysis
-	 
+**Note**: If CloudTrail logs are not available in CloudWatch Logs, CloudTrail auditing features will not be available. To enable, configure CloudTrail to send events to a CloudWatch Logs log group.
+
+### 5. Cost Explorer
+
+**Primary Use Case**: AWS cost analysis, forecasting, and optimization
+
+**Key Features**:
+- Cost and usage data retrieval with flexible grouping
+- Cost forecasting based on historical patterns
+- Cost comparison between time periods
+- Cost driver analysis to identify spending changes
+- Support for filtering by service, region, tags, and more
+- Dimension and tag value discovery
+
+**When to Use**:
+- Analyzing AWS spending patterns
+- Forecasting future costs
+- Identifying cost optimization opportunities
+- Comparing costs across time periods
+- Understanding what's driving cost changes
+- Budget planning and cost allocation
+
+### 6. AWS Documentation Access
+
+**Primary Use Case**: Quick access to official AWS documentation
+
+**Key Features**:
+- Search AWS documentation directly
+- Read documentation pages in markdown format
+- Get content recommendations for related topics
+- Access service-specific guides and API references
+
+**When to Use**:
+- Looking up AWS service documentation
+- Understanding API parameters and behavior
+- Finding best practices and tutorials
+- Troubleshooting with official guidance
+
+### 7. Codebase Observability Analysis
+
 **Primary Use Case**: Automated analysis of application codebases to identify observability gaps
 
 **Key Features**:
@@ -159,100 +202,25 @@ The comprehensive AWS observability platform combining monitoring, troubleshooti
 - Establishing observability baselines
 - Training teams on observability patterns
 
-### 6. AWS Documentation Access
-
-**Primary Use Case**: Quick access to official AWS documentation
-
-**Key Features**:
-- Search AWS documentation directly
-- Read documentation pages in markdown format
-- Get content recommendations for related topics
-- Access service-specific guides and API references
-
-**When to Use**:
-- Looking up AWS service documentation
-- Understanding API parameters and behavior
-- Finding best practices and tutorials
-- Troubleshooting with official guidance
-
 ## Available Steering Files
 
-### 1. `incident-response.md`
-**Troubleshooting and incident management workflows**
-
-Load this when the user needs to:
-- Respond to production incidents
-- Troubleshoot application errors or performance issues
-- Investigate service outages
-- Perform root cause analysis
-- Create incident reports and postmortems
-
-### 2. `log-analysis.md`
-**Log querying and analysis patterns**
-
-Load this when the user needs to:
-- Query logs using CloudWatch Logs Insights
-- Search and filter log events
-- Extract structured data from JSON logs
-- Aggregate log data with statistics
-- Troubleshoot application issues using logs
-
-### 3. `alerting-setup.md`
-**Creating intelligent alarms and notifications**
-
-Load this when the user needs to:
-- Set up new CloudWatch alarms
-- Improve existing alarm configurations
-- Reduce alarm fatigue and false positives
-- Create intelligent alerting strategies
-- Implement SLO-based alerting
-
-### 4. `performance-monitoring.md`
-**Application Signals APM and performance tracking**
-
-Load this when the user needs to:
-- Monitor microservices health and performance
-- Analyze distributed traces
-- Set up Service Level Objectives (SLOs)
-- Troubleshoot performance issues
-- Understand service dependencies
-- Track error rates and latency
-
-### 5. `security-auditing.md`
-**CloudTrail security analysis and compliance**
-
-Load this when the user needs to:
-- Investigate security incidents
-- Track API activity and resource changes
-- Perform compliance audits
-- Monitor IAM changes
-- Detect unauthorized access attempts
-- Generate audit reports
-
-### 6. `observability-gap-analysis.md`
-**Codebase observability analysis and recommendations**
-
-Load this when the user needs to:
-- Audit a codebase for observability best practices
-- Identify missing instrumentation points
-- Analyze logging patterns and gaps
-- Review metrics collection coverage
-- Assess distributed tracing implementation
-- Get recommendations for observability improvements
-
-### 7. `application-signals-setup.md`
-**Step-by-step Application Signals enablement**
-
-This steering file provides comprehensive guidance for setting up AWS Application Signals using the power's enablement guide feature. Always start by getting the official enablement guide from AWS using the `get_enablement_guide` tool.
+1. **`log-analysis.md`** - Log querying and analysis patterns
+2. **`performance-monitoring.md`** - Application Signals APM and performance tracking
+3. **`security-auditing.md`** - CloudTrail security analysis and compliance
+4. **`cost-optimization.md`** - Cost Explorer analysis and optimization strategies
+5. **`incident-response.md`** - Troubleshooting and incident management workflows
+6. **`alerting-setup.md`** - Creating intelligent alarms and notifications
+7. **`application-signals-setup.md`** - Step-by-step Application Signals enablement
+8. **`codebase-observability-analysis.md`** - Codebase analysis for observability gaps
 
 ## Quick Start Examples
 
 ### Example 1: Investigate High Error Rate
 
 ```
-1. Check active alarms for service health
+1. Check Application Signals for service health
    - Identify services with elevated error rates
-   - View service dependencies and call paths in Application Signals
+   - View service dependencies and call paths
 
 2. Query CloudWatch Logs
    - Find error patterns and stack traces
@@ -287,6 +255,11 @@ This steering file provides comprehensive guidance for setting up AWS Applicatio
 3. Examine logs for patterns
    - Calculate percentiles and aggregations
    - Identify slow operations and outliers
+
+4. Review Cost Explorer
+   - Analyze costs by service and resource
+   - Identify optimization opportunities
+   - Forecast future costs
 ```
 
 ### Example 3: Security Audit
@@ -307,6 +280,35 @@ This steering file provides comprehensive guidance for setting up AWS Applicatio
 
 4. Document findings
    - Access AWS documentation for security best practices
+```
+
+### Example 4: Codebase Observability Audit
+
+```
+1. Analyze codebase structure
+   - Identify entry points (API handlers, Lambda functions)
+   - Map critical business operations
+   - Review error handling patterns
+
+2. Assess logging coverage
+   - Check for structured logging implementation
+   - Identify missing correlation IDs
+   - Find silent failures and empty catch blocks
+
+3. Evaluate metrics instrumentation
+   - Review custom CloudWatch metrics
+   - Check business metric coverage
+   - Assess performance metric collection
+
+4. Review distributed tracing
+   - Verify X-Ray SDK integration
+   - Check trace context propagation
+   - Evaluate subsegment coverage
+
+5. Generate actionable report
+   - Prioritize gaps by severity
+   - Provide code examples for fixes
+   - Estimate implementation effort
 ```
 
 ## Log Query Patterns
@@ -399,9 +401,15 @@ fields @timestamp, @message, @logStream
    - Examine traces for long-running spans
    - Check service maps for dependency issues
 
-3. **Implement and Monitor**
+3. **Cost Analysis**
+   - Review Cost Explorer for resource spending
+   - Identify over-provisioned resources
+   - Forecast cost impact of optimizations
+
+4. **Implement and Monitor**
    - Set up alarms with recommended thresholds
    - Track SLO compliance
+   - Monitor cost changes
 
 ### Workflow 3: Security and Compliance Audit
 
@@ -456,6 +464,12 @@ fields @timestamp, @message, @logStream
 3. Set up alerts for critical security events
 4. Regular audit log reviews
 
+### Cost Explorer
+1. Use tags for cost allocation and tracking
+2. Set up budgets and alerts for cost overruns
+3. Regularly review cost drivers and optimization opportunities
+4. Forecast costs before making infrastructure changes
+
 ## Integration Patterns
 
 ### Logs + Metrics + Traces
@@ -478,6 +492,33 @@ fields @timestamp, @message, errorType, requestId
 ```
 Then cross-reference timestamps with CloudTrail events using the `lookup_events` tool to identify configuration changes that may have caused errors.
 
+### Metrics + Cost
+Use CloudWatch Metrics to identify high-utilization resources, then analyze their costs in Cost Explorer to find optimization opportunities.
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"Insufficient permissions" errors**
+   - Verify IAM policies include all required actions
+   - Check resource-based policies on log groups
+   - Ensure Cost Explorer is enabled in your account
+
+2. **"Query timeout" errors**
+   - Reduce time range in queries
+   - Use more specific filters
+   - Query fewer log groups at once
+
+3. **"No results found"**
+   - Verify log group names and ARNs are correct
+   - Check time range matches your data
+   - Ensure field names are case-sensitive correct
+
+4. **MCP server connection issues**
+   - Verify uvx is installed: `pip install uv`
+   - Check AWS credentials: `aws sts get-caller-identity`
+   - Review MCP server logs (set FASTMCP_LOG_LEVEL=DEBUG)
+
 ## Available MCP Servers
 
 ### awslabs.cloudwatch-mcp-server
@@ -488,6 +529,9 @@ Application Signals APM with service health, SLOs, and distributed tracing.
 
 ### awslabs.cloudtrail-mcp-server
 CloudTrail security auditing and API activity tracking.
+
+### awslabs.cost-explorer-mcp-server
+AWS cost analysis, forecasting, and optimization.
 
 ### awslabs.aws-documentation-mcp-server
 Search and read official AWS documentation.

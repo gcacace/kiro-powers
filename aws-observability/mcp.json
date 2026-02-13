@@ -28,6 +28,19 @@
       "disabled": false,
       "autoApprove": []
     },
+    "awslabs.cloudtrail-mcp-server": {
+      "autoApprove": [],
+      "disabled": false,
+      "command": "uvx",
+      "args": [
+        "awslabs.cloudtrail-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "default",
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "transportType": "stdio"
+    },
     "awslabs.aws-documentation-mcp-server": {
       "command": "uvx",
       "args": [

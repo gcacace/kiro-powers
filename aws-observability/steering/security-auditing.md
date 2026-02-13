@@ -1,22 +1,33 @@
 # CloudTrail Security Auditing Steering
 
 ## Purpose
-This steering file provides guidance for using CloudTrail logs in CloudWatch Logs to perform security auditing, compliance monitoring, and governance analysis using CloudWatch Logs Insights queries.
+This steering file provides guidance for accessing and analyzing CloudTrail audit data for security auditing, compliance monitoring, and governance analysis.
 
-## Prerequisites
+## Prerequisites and Data Source Selection
 
-**CloudTrail security auditing requires CloudTrail to be configured to send events to CloudWatch Logs.**
+**IMPORTANT**: CloudTrail audit data can be accessed through multiple sources. Always follow the priority order defined in `cloudtrail-data-source-selection.md`:
 
-### To check if CloudTrail logs are available:
+### Priority 1: CloudTrail Lake (Preferred)
+Check first for CloudTrail Lake event data stores using the CloudTrail MCP server:
+- Use `list_event_data_stores` to check for enabled event data stores
+- If available, use `query_event_data_store` for SQL-based analysis
+- Best for complex queries, long-term retention (7 years), and cost efficiency
 
-Use the `describe_log_groups` tool and look for log groups containing "cloudtrail" in the name. Common patterns include:
-- `/aws/cloudtrail/logs`
-- `/aws/cloudtrail/<trail-name>`
-- `CloudTrail/logs`
-- `<organization-name>-cloudtrail`
-- Any log group with "cloudtrail" in the name
+### Priority 2: CloudWatch Logs (If CloudTrail Lake not available)
+Check for CloudTrail integration with CloudWatch Logs:
+- Use `describe_log_groups` to look for log groups containing "cloudtrail" in the name
+- Common patterns: `/aws/cloudtrail/logs`, `/aws/cloudtrail/<trail-name>`, `CloudTrail/logs`
+- Use `execute_log_insights_query` for CloudWatch Logs Insights analysis
+- Good for real-time monitoring and CloudWatch Alarms integration
 
-**If no CloudTrail log groups are found**, this steering file's features cannot be used. You'll need to configure CloudTrail to send events to CloudWatch Logs first.
+### Priority 3: CloudTrail Lookup Events API (Fallback)
+If neither CloudTrail Lake nor CloudWatch Logs available:
+- Use `lookup_events` from CloudTrail MCP server
+- Limited to last 90 days of events
+- Basic filtering with LookupAttributes
+- Good for quick lookups but limited query capabilities
+
+**See `cloudtrail-data-source-selection.md` for detailed decision tree and implementation workflow.**
 
 ## When to Load This Steering
 Load this when the user needs to:
@@ -91,19 +102,41 @@ CloudTrail events in CloudWatch Logs contain these key fields:
 }
 ```
 
-## CloudWatch Logs Insights for CloudTrail
+## Querying CloudTrail Data
 
-### Query Patterns
+### Using CloudTrail Lake (Priority 1)
 
-#### Pattern 1: Basic Event Lookup
+When CloudTrail Lake event data store is available, use SQL-based queries:
+
+**Tool**: `query_event_data_store` from CloudTrail MCP server
+
+**Example Query:**
+```sql
+SELECT 
+    eventTime,
+    eventName,
+    userIdentity.userName,
+    sourceIPAddress,
+    requestParameters
+FROM <event_data_store_id>
+WHERE eventName IN ('DeleteBucket', 'TerminateInstances')
+    AND eventTime > timestamp '2024-01-01 00:00:00'
+ORDER BY eventTime DESC
+LIMIT 50
 ```
-Use execute_log_insights_query with:
-  - log_group_names: ["/aws/cloudtrail/logs"]  # Or your CloudTrail log group name
-  - query_string: CloudWatch Logs Insights query (see examples below)
-  - start_time: ISO 8601 format (e.g., "2024-01-01T00:00:00Z")
-  - end_time: ISO 8601 format
-  - limit: 50 (or as needed)
-```
+
+**Advantages**:
+- Full SQL support with JOINs, aggregations, and window functions
+- 7-year retention by default
+- Cross-account and cross-region queries
+- Cost-effective for large-scale analysis
+- Advanced filtering and partitioning
+
+### Using CloudWatch Logs (Priority 2)
+
+When CloudTrail is integrated with CloudWatch Logs:
+
+**Tool**: `execute_log_insights_query` from CloudWatch MCP server
 
 **Example Query:**
 ```
@@ -112,6 +145,48 @@ fields eventTime, eventName, userIdentity.userName, sourceIPAddress, requestPara
 | sort eventTime desc
 | limit 50
 ```
+
+**Query Parameters:**
+```
+- log_group_names: ["/aws/cloudtrail/logs"]  # Or your CloudTrail log group name
+- query_string: CloudWatch Logs Insights query (see above)
+- start_time: ISO 8601 format (e.g., "2024-01-01T00:00:00Z")
+- end_time: ISO 8601 format
+- limit: 50 (or as needed)
+```
+
+**Advantages**:
+- Real-time event streaming
+- CloudWatch Alarms integration
+- Cross-service log correlation
+- Familiar CloudWatch interface
+
+### Using Lookup Events API (Priority 3 - Fallback)
+
+When neither CloudTrail Lake nor CloudWatch Logs available:
+
+**Tool**: `lookup_events` from CloudTrail MCP server
+
+**Example Usage:**
+```
+lookup_events(
+    LookupAttributes=[
+        {
+            'AttributeKey': 'EventName',
+            'AttributeValue': 'DeleteBucket'
+        }
+    ],
+    StartTime='2024-01-01T00:00:00Z',
+    EndTime='2024-12-31T23:59:59Z',
+    MaxResults=50
+)
+```
+
+**Limitations**:
+- Only last 90 days of events
+- Limited to 50 results per API call
+- Basic filtering capabilities
+- No SQL or complex query support
 
 #### Pattern 2: Security Incident Investigation
 ```

@@ -74,6 +74,10 @@ Load this when the user needs to:
    - Check for resource exhaustion (CPU, memory, connections)
 
 4. **CloudTrail Events**
+   - **Follow CloudTrail data source priority** (see `cloudtrail-data-source-selection.md`):
+     - Priority 1: Check CloudTrail Lake event data stores
+     - Priority 2: Check CloudWatch Logs for CloudTrail integration
+     - Priority 3: Use CloudTrail Lookup Events API
    - Query for recent configuration changes
    - Check for deployments or infrastructure modifications
    - Identify who made changes and when
@@ -85,7 +89,7 @@ Load this when the user needs to:
 2. Query logs for errors starting at that time
 3. Extract trace IDs from error logs
 4. Analyze traces for failure points
-5. Check CloudTrail for changes before incident
+5. Check CloudTrail for changes before incident (use priority order)
 6. Correlate metrics with error patterns
 ```
 
@@ -99,7 +103,7 @@ Load this when the user needs to:
 **Common Mitigation Strategies**:
 
 1. **Rollback Deployment**
-   - Check CloudTrail for recent deployments
+   - Check CloudTrail for recent deployments (use data source priority)
    - Identify deployment time vs incident start
    - Rollback to previous stable version
    - Verify service recovery
@@ -474,9 +478,14 @@ Query: get_metric_data(
 Result: Database CPU at 95%
 ```
 
-**Step 6: Check CloudTrail (via CloudWatch Logs)**
+**Step 6: Check CloudTrail for Changes**
 ```
-# Query CloudTrail logs for RDS changes
+# Follow CloudTrail data source priority:
+# 1. Check CloudTrail Lake (if available)
+# 2. Check CloudWatch Logs (if CloudTrail integrated)
+# 3. Use Lookup Events API (fallback)
+
+# Example using CloudWatch Logs (Priority 2):
 fields eventTime, eventName, userIdentity.userName, requestParameters
 | filter eventSource = "rds.amazonaws.com"
 | sort eventTime desc

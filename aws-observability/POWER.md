@@ -120,19 +120,24 @@ The comprehensive AWS observability platform combining monitoring, troubleshooti
 - Root cause analysis for distributed systems
 - Getting started with Application Signals setup
 
-### 4. CloudTrail Security Auditing (via CloudWatch Logs)
+### 4. CloudTrail Security Auditing
 
 **Primary Use Case**: Security auditing, compliance, and governance
 
-**Prerequisites**: CloudTrail must be configured to send logs to CloudWatch Logs
+**Data Source Priority**: CloudTrail data is accessed through multiple sources in priority order:
+1. **CloudTrail Lake** (Priority 1) - SQL-based querying with 7-year retention
+2. **CloudWatch Logs** (Priority 2) - Real-time analysis with CloudWatch integration
+3. **Lookup Events API** (Priority 3) - Fallback for basic queries (90-day limit)
+
+See `cloudtrail-data-source-selection.md` steering file for detailed decision tree.
 
 **Key Features**:
-- API call history and analysis using CloudWatch Logs Insights queries
+- API call history and analysis
 - User activity tracking across AWS accounts
 - Resource change tracking and audit trails
 - IAM permission change monitoring
 - Compliance reporting and security investigations
-- Real-time correlation with application logs
+- Multiple data source options for flexibility
 
 **When to Use**:
 - Investigating security incidents
@@ -140,9 +145,15 @@ The comprehensive AWS observability platform combining monitoring, troubleshooti
 - Compliance auditing and reporting
 - Understanding who did what and when
 - Detecting unauthorized access attempts
-- Correlating security events with application behavior
+- Root cause analysis for configuration changes
 
-**Note**: If CloudTrail logs are not available in CloudWatch Logs, CloudTrail auditing features will not be available. To enable, configure CloudTrail to send events to a CloudWatch Logs log group.
+**Data Source Selection**:
+The power automatically checks for available CloudTrail data sources in priority order:
+1. First checks for CloudTrail Lake event data stores (best for complex queries)
+2. Falls back to CloudWatch Logs if CloudTrail is integrated (good for real-time)
+3. Uses Lookup Events API as final fallback (limited to 90 days)
+
+**Note**: The power will guide you to the most appropriate data source based on availability and your query requirements.
 
 ### 5. Cost Explorer
 
@@ -204,14 +215,15 @@ The comprehensive AWS observability platform combining monitoring, troubleshooti
 
 ## Available Steering Files
 
-1. **`log-analysis.md`** - Log querying and analysis patterns
-2. **`performance-monitoring.md`** - Application Signals APM and performance tracking
-3. **`security-auditing.md`** - CloudTrail security analysis and compliance
-4. **`cost-optimization.md`** - Cost Explorer analysis and optimization strategies
-5. **`incident-response.md`** - Troubleshooting and incident management workflows
-6. **`alerting-setup.md`** - Creating intelligent alarms and notifications
-7. **`application-signals-setup.md`** - Step-by-step Application Signals enablement
-8. **`codebase-observability-analysis.md`** - Codebase analysis for observability gaps
+1. **`cloudtrail-data-source-selection.md`** - CloudTrail data source priority and selection strategy
+2. **`log-analysis.md`** - Log querying and analysis patterns
+3. **`performance-monitoring.md`** - Application Signals APM and performance tracking
+4. **`security-auditing.md`** - CloudTrail security analysis and compliance
+5. **`cost-optimization.md`** - Cost Explorer analysis and optimization strategies
+6. **`incident-response.md`** - Troubleshooting and incident management workflows
+7. **`alerting-setup.md`** - Creating intelligent alarms and notifications
+8. **`application-signals-setup.md`** - Step-by-step Application Signals enablement
+9. **`codebase-observability-analysis.md`** - Codebase analysis for observability gaps
 
 ## Quick Start Examples
 
@@ -460,9 +472,11 @@ fields @timestamp, @message, @logStream
 
 ### CloudTrail
 1. Enable CloudTrail in all regions
-2. Integrate with CloudWatch Logs for real-time analysis
-3. Set up alerts for critical security events
-4. Regular audit log reviews
+2. **Consider CloudTrail Lake** for long-term retention and SQL-based analysis
+3. Integrate with CloudWatch Logs for real-time analysis and alerting
+4. Set up alerts for critical security events
+5. Regular audit log reviews
+6. Use the data source priority approach for efficient querying
 
 ### Cost Explorer
 1. Use tags for cost allocation and tracking
@@ -490,7 +504,12 @@ fields @timestamp, @message, errorType, requestId
 | sort @timestamp desc
 | limit 50
 ```
-Then cross-reference timestamps with CloudTrail events using the `lookup_events` tool to identify configuration changes that may have caused errors.
+Then cross-reference timestamps with CloudTrail events using the data source priority:
+1. Query CloudTrail Lake event data store (if available)
+2. Query CloudWatch Logs for CloudTrail events (if integrated)
+3. Use `lookup_events` API (fallback)
+
+This helps identify configuration changes that may have caused errors.
 
 ### Metrics + Cost
 Use CloudWatch Metrics to identify high-utilization resources, then analyze their costs in Cost Explorer to find optimization opportunities.
